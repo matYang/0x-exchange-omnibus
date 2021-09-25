@@ -1,10 +1,6 @@
 const ERC20Proxy = artifacts.require('ERC20Proxy');
 const ERC721Proxy = artifacts.require('ERC721Proxy');
 const WETH9 = artifacts.require('WETH9');
-const ZRXToken = artifacts.require('ZRXToken');
-const ZrxVault = artifacts.require('ZrxVault');
-const Staking = artifacts.require('Staking');
-const StakingProxy = artifacts.require('StakingProxy');
 const ERC20BridgeProxy = artifacts.require('ERC20BridgeProxy');
 const ERC1155Proxy = artifacts.require('ERC1155Proxy');
 const StaticCallProxy = artifacts.require('StaticCallProxy');
@@ -29,19 +25,8 @@ module.exports = async (deployer, network, accounts) => {
     await deployer.deploy(WETH9, txDefaults);
     const weth9 = new WETH9.web3.eth.Contract(WETH9.abi, WETH9.address);
 
-    await deployer.deploy(ZRXToken, txDefaults);
-    const zrxToken = new ZRXToken.web3.eth.Contract(ZRXToken.abi, ZRXToken.address);
-
-    await deployer.deploy(ZrxVault, ERC20Proxy.address, ZRXToken.address, txDefaults);
-    const zrxVault = new ZrxVault.web3.eth.Contract(ZrxVault.abi, ZrxVault.address);
-
     await deployer.deploy(CoordinatorRegistry, txDefaults);
     const coordinatorRegistry = new CoordinatorRegistry.web3.eth.Contract(CoordinatorRegistry.abi, CoordinatorRegistry.address);
-
-    await deployer.deploy(Staking, txDefaults);
-    await deployer.deploy(StakingProxy, Staking.address, txDefaults);
-    const stakingProxy = new StakingProxy.web3.eth.Contract(StakingProxy.abi, StakingProxy.address);
-    const staking = new Staking.web3.eth.Contract(Staking.abi, StakingProxy.address); // Note StakingProxy address
 
     await deployer.deploy(ERC20BridgeProxy, txDefaults);
     const erc20BridgeProxy = new ERC20BridgeProxy.web3.eth.Contract(ERC20BridgeProxy.abi, ERC20BridgeProxy.address);
@@ -61,7 +46,6 @@ module.exports = async (deployer, network, accounts) => {
     console.log('Configuring ERC20Proxy...');
     await erc20Proxy.methods.addAuthorizedAddress(Exchange.address).send(txDefaults);
     await erc20Proxy.methods.addAuthorizedAddress(MultiAssetProxy.address).send(txDefaults);
-    await erc20Proxy.methods.addAuthorizedAddress(ZrxVault.address).send(txDefaults);
     console.log('ERC20Proxy configured!');
 
     console.log('Configuring ERC721Proxy...');
@@ -102,22 +86,11 @@ module.exports = async (deployer, network, accounts) => {
     await exchange.methods.registerAssetProxy(ERC20BridgeProxy.address).send(txDefaults);
     console.log('Exchange configured!');
 
-    console.log('Configuring ZrxVault...');
-    await zrxVault.methods.addAuthorizedAddress(txDefaults.from).send(txDefaults);
-    await zrxVault.methods.setStakingProxy(StakingProxy.address).send(txDefaults);
-    await zrxVault.methods.setZrxProxy(ERC20Proxy.address).send(txDefaults);
-    console.log('ZrxVault configured!');
-
-    console.log('Configuring StakingProxy...');
-    await stakingProxy.methods.addAuthorizedAddress(txDefaults.from).send(txDefaults);
-    await staking.methods.addExchangeAddress(Exchange.address).send(txDefaults);
-    console.log('StakingProxy configured!');
 
     const contractAddresses = {
         erc20Proxy: ERC20Proxy.address,
         erc721Proxy: ERC721Proxy.address,
         erc1155Proxy: ERC1155Proxy.address,
-        zrxToken: ZRXToken.address,
         etherToken: WETH9.address,
         exchange: Exchange.address,
         erc20BridgeProxy: ERC20BridgeProxy.address,
@@ -125,10 +98,7 @@ module.exports = async (deployer, network, accounts) => {
         coordinatorRegistry: CoordinatorRegistry.address,
         coordinator: NULL_ADDRESS,
         multiAssetProxy: MultiAssetProxy.address,
-        staticCallProxy: StaticCallProxy.address,
-        zrxVault: ZrxVault.address,
-        staking: Staking.address,
-        stakingProxy: NULL_ADDRESS
+        staticCallProxy: StaticCallProxy.address
     };
 
     console.log("Addresses:", contractAddresses);
