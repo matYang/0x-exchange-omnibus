@@ -46,16 +46,5 @@ perl -i.tmp -pe 's/XXX/ERC20/g' erc20.go
 rm -f erc20.go.tmp
 gofmt -w erc20.go 
 
-# weth9.go generation
-cat build/contracts/WETH9.json | jq .abi > WETH9.abi
-abigen --abi WETH9.abi --pkg XXX > weth9.go
-rm -f WETH9.abi
 
-perl -i.tmp -pe 's/package XXX/package wrappers/' weth9.go
-perl -i.tmp -pe 's/XXXWETH9/WETH9/g' weth9.go
-perl -i.tmp -pe 's/_XXX/f/g' weth9.go
-perl -i.tmp -pe 's/XXX/WETH9/g' weth9.go
-rm -f weth9.go.tmp
-gofmt -w weth9.go 
-
-echo "All done! Move dev_utils.go, exchange.go, erc20.go, weth9.go into zeroex-go/wrappers/ now.\nmv dev_utils.go exchange.go erc20.go weth9.go ../zeroex-go/wrappers"
+echo "All done! Move dev_utils.go, exchange.go, erc20.go into zeroex-go/wrappers/ now.\nmv dev_utils.go exchange.go erc20.go ../zeroex-go/wrappers"

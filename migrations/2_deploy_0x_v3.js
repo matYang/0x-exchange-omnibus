@@ -1,6 +1,5 @@
 const ERC20Proxy = artifacts.require('ERC20Proxy');
 const ERC721Proxy = artifacts.require('ERC721Proxy');
-const WETH9 = artifacts.require('WETH9');
 const ERC20BridgeProxy = artifacts.require('ERC20BridgeProxy');
 const ERC1155Proxy = artifacts.require('ERC1155Proxy');
 const StaticCallProxy = artifacts.require('StaticCallProxy');
@@ -21,9 +20,6 @@ module.exports = async (deployer, network, accounts) => {
 
     await deployer.deploy(ERC721Proxy, txDefaults);
     const erc721Proxy = new ERC721Proxy.web3.eth.Contract(ERC721Proxy.abi, ERC721Proxy.address);
-
-    await deployer.deploy(WETH9, txDefaults);
-    const weth9 = new WETH9.web3.eth.Contract(WETH9.abi, WETH9.address);
 
     await deployer.deploy(CoordinatorRegistry, txDefaults);
     const coordinatorRegistry = new CoordinatorRegistry.web3.eth.Contract(CoordinatorRegistry.abi, CoordinatorRegistry.address);
@@ -91,7 +87,6 @@ module.exports = async (deployer, network, accounts) => {
         erc20Proxy: ERC20Proxy.address,
         erc721Proxy: ERC721Proxy.address,
         erc1155Proxy: ERC1155Proxy.address,
-        etherToken: WETH9.address,
         exchange: Exchange.address,
         erc20BridgeProxy: ERC20BridgeProxy.address,
         forwarder: NULL_ADDRESS,
