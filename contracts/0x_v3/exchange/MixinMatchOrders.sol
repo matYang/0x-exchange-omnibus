@@ -282,7 +282,7 @@ abstract contract MixinMatchOrders is
                 // Update the batched fill results once the leftIdx is updated.
                 batchMatchedFillResults.left[leftIdx++] = leftFillResults;
                 // Clear the intermediate fill results value.
-                leftFillResults = LibFillResults.FillResults(0, 0, 0, 0, 0);
+                leftFillResults = LibFillResults.FillResults(0, 0, 0, 0);
 
                 // If all of the left orders have been filled, break out of the loop.
                 // Otherwise, update the current right order.
@@ -302,7 +302,7 @@ abstract contract MixinMatchOrders is
                 // Update the batched fill results once the rightIdx is updated.
                 batchMatchedFillResults.right[rightIdx++] = rightFillResults;
                 // Clear the intermediate fill results value.
-                rightFillResults = LibFillResults.FillResults(0, 0, 0, 0, 0);
+                rightFillResults = LibFillResults.FillResults(0, 0, 0, 0);
 
                 // If all of the right orders have been filled, break out of the loop.
                 // Otherwise, update the current right order.
