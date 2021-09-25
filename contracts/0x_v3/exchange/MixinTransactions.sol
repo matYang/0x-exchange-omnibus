@@ -138,25 +138,6 @@ abstract contract MixinTransactions is
         internal
         view
     {
-        // Check transaction is not expired
-        // solhint-disable-next-line not-rely-on-time
-        if (block.timestamp >= transaction.expirationTimeSeconds) {
-            LibRichErrors.rrevert(LibExchangeRichErrors.TransactionError(
-                LibExchangeRichErrors.TransactionErrorCodes.EXPIRED,
-                transactionHash
-            ));
-        }
-
-        // Validate that transaction is executed with the correct gasPrice
-        uint256 requiredGasPrice = transaction.gasPrice;
-        if (tx.gasprice != requiredGasPrice) {
-            LibRichErrors.rrevert(LibExchangeRichErrors.TransactionGasPriceError(
-                transactionHash,
-                tx.gasprice,
-                requiredGasPrice
-            ));
-        }
-
         // Prevent `executeTransaction` from being called when context is already set
         address currentContextAddress_ = currentContextAddress;
         if (currentContextAddress_ != address(0)) {
