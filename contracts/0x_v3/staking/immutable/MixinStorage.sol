@@ -76,7 +76,6 @@ contract MixinStorage is
     // mapping from Pool Id to Epoch
     mapping (bytes32 => uint256) internal _cumulativeRewardsByPoolLastStored;
 
-    /// @dev Registered 0x Exchange contracts, capable of paying protocol fees.
     /// @param 0 The address to check.
     /// @return 0 Whether the address is a registered exchange.
     mapping (address => bool) public validExchanges;

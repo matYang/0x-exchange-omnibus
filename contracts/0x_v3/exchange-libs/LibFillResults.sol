@@ -39,7 +39,6 @@ library LibFillResults {
         uint256 takerAssetFilledAmount;  // Total amount of takerAsset(s) filled.
         uint256 makerFeePaid;            // Total amount of fees paid by maker(s) to feeRecipient(s).
         uint256 takerFeePaid;            // Total amount of fees paid by taker to feeRecipients(s).
-        uint256 protocolFeePaid;         // Total amount of fees paid by taker to the staking contract.
     }
 
     struct MatchedFillResults {
@@ -55,8 +54,7 @@ library LibFillResults {
     /// @return fillResults Amounts filled and fees paid by maker and taker.
     function calculateFillResults(
         LibOrder.Order memory order,
-        uint256 takerAssetFilledAmount,
-        uint256 /*  protocolFeeMultiplier */
+        uint256 takerAssetFilledAmount
     )
         internal
         pure
@@ -80,9 +78,6 @@ library LibFillResults {
             order.takerFee
         );
 
-        // Compute the protocol fee that should be paid for a single fill.
-        fillResults.protocolFeePaid = 0;
-
         return fillResults;
     }
 
@@ -102,7 +97,6 @@ library LibFillResults {
         LibOrder.Order memory rightOrder,
         uint256 leftOrderTakerAssetFilledAmount,
         uint256 rightOrderTakerAssetFilledAmount,
-        uint256 /* protocolFeeMultiplier */,
         bool shouldMaximallyFillOrders
     )
         internal
@@ -168,11 +162,6 @@ library LibFillResults {
             rightOrder.takerFee
         );
 
-        // Compute the protocol fee that should be paid for a single fill. In this
-        // case this should be made the protocol fee for both the left and right orders.
-        uint256 protocolFee = 0;
-        matchedFillResults.left.protocolFeePaid = protocolFee;
-        matchedFillResults.right.protocolFeePaid = protocolFee;
 
         // Return fill results
         return matchedFillResults;
@@ -194,7 +183,6 @@ library LibFillResults {
         totalFillResults.takerAssetFilledAmount = fillResults1.takerAssetFilledAmount.safeAdd(fillResults2.takerAssetFilledAmount);
         totalFillResults.makerFeePaid = fillResults1.makerFeePaid.safeAdd(fillResults2.makerFeePaid);
         totalFillResults.takerFeePaid = fillResults1.takerFeePaid.safeAdd(fillResults2.takerFeePaid);
-        totalFillResults.protocolFeePaid = fillResults1.protocolFeePaid.safeAdd(fillResults2.protocolFeePaid);
 
         return totalFillResults;
     }

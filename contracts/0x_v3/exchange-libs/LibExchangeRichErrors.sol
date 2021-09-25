@@ -142,10 +142,6 @@ library LibExchangeRichErrors {
     bytes4 internal constant BATCH_MATCH_ORDERS_ERROR_SELECTOR =
         0xd4092f4f;
 
-    // bytes4(keccak256("PayProtocolFeeError(bytes32,uint256,address,address,bytes)"))
-    bytes4 internal constant PAY_PROTOCOL_FEE_ERROR_SELECTOR =
-        0x87cb1e75;
-
     // solhint-disable func-name-mixedcase
     function SignatureErrorSelector()
         internal
@@ -289,14 +285,6 @@ library LibExchangeRichErrors {
         returns (bytes4)
     {
         return TRANSACTION_INVALID_CONTEXT_ERROR_SELECTOR;
-    }
-
-    function PayProtocolFeeErrorSelector()
-        internal
-        pure
-        returns (bytes4)
-    {
-        return PAY_PROTOCOL_FEE_ERROR_SELECTOR;
     }
     
     function BatchMatchOrdersError(
@@ -588,27 +576,6 @@ library LibExchangeRichErrors {
             errorCode,
             expectedAssetFillAmount,
             actualAssetFillAmount
-        );
-    }
-
-    function PayProtocolFeeError(
-        bytes32 orderHash,
-        uint256 protocolFee,
-        address makerAddress,
-        address takerAddress,
-        bytes memory errorData
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSelector(
-            PAY_PROTOCOL_FEE_ERROR_SELECTOR,
-            orderHash,
-            protocolFee,
-            makerAddress,
-            takerAddress,
-            errorData
         );
     }
 }

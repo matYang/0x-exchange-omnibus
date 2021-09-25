@@ -94,8 +94,6 @@ module.exports = async (deployer, network, accounts) => {
     console.log('MultiAssetProxy configured!');
 
     console.log('Configuring Exchange...');
-    await exchange.methods.setProtocolFeeCollectorAddress(StakingProxy.address).send(txDefaults);
-    await exchange.methods.setProtocolFeeMultiplier('0x249f0').send(txDefaults);
     await exchange.methods.registerAssetProxy(ERC20Proxy.address).send(txDefaults);
     await exchange.methods.registerAssetProxy(ERC721Proxy.address).send(txDefaults);
     await exchange.methods.registerAssetProxy(ERC1155Proxy.address).send(txDefaults);

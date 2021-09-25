@@ -382,7 +382,6 @@ abstract contract MixinMatchOrders is
             rightOrder,
             leftOrderInfo.orderTakerAssetFilledAmount,
             rightOrderInfo.orderTakerAssetFilledAmount,
-            protocolFeeMultiplier,
             shouldMaximallyFillOrders
         );
 
@@ -489,21 +488,6 @@ abstract contract MixinMatchOrders is
             matchedFillResults.profitInRightMakerAsset
         );
 
-        // Pay protocol fees for each maker
-        bool didPayProtocolFees = _payTwoProtocolFees(
-            leftOrderHash,
-            rightOrderHash,
-            matchedFillResults.left.protocolFeePaid,
-            leftMakerAddress,
-            rightMakerAddress,
-            takerAddress
-        );
-
-        // Protocol fees are not paid if the protocolFeeCollector contract is not set
-        if (!didPayProtocolFees) {
-            matchedFillResults.left.protocolFeePaid = 0;
-            matchedFillResults.right.protocolFeePaid = 0;
-        }
 
         // Settle taker fees.
         if (

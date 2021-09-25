@@ -39,8 +39,7 @@ abstract contract IExchangeCore {
         uint256 makerAssetFilledAmount,       // Amount of makerAsset sold by maker and bought by taker.
         uint256 takerAssetFilledAmount,       // Amount of takerAsset sold by taker and bought by maker.
         uint256 makerFeePaid,                 // Amount of makerFeeAssetData paid to feeRecipient by maker.
-        uint256 takerFeePaid,                 // Amount of takerFeeAssetData paid to feeRecipient by taker.
-        uint256 protocolFeePaid               // Amount of eth or weth paid to the staking contract.
+        uint256 takerFeePaid                  // Amount of takerFeeAssetData paid to feeRecipient by taker.
     );
 
     // Cancel event is emitted whenever an individual order is cancelled.

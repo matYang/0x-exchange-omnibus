@@ -29,7 +29,6 @@ import "../exchange-libs/LibEIP712ExchangeDomain.sol";
 import "../exchange-libs/LibExchangeRichErrors.sol";
 import "./interfaces/IExchangeCore.sol";
 import "./MixinAssetProxyDispatcher.sol";
-import "./MixinProtocolFees.sol";
 import "./MixinSignatureValidator.sol";
 
 abstract contract MixinExchangeCore is
@@ -37,7 +36,6 @@ abstract contract MixinExchangeCore is
     Refundable,
     LibEIP712ExchangeDomain,
     MixinAssetProxyDispatcher,
-    MixinProtocolFees,
     MixinSignatureValidator
 {
     using LibOrder for LibOrder.Order;
@@ -225,8 +223,7 @@ abstract contract MixinExchangeCore is
         // Compute proportional fill amounts
         fillResults = LibFillResults.calculateFillResults(
             order,
-            takerAssetFilledAmount,
-            protocolFeeMultiplier
+            takerAssetFilledAmount
         );
 
         bytes32 orderHash = orderInfo.orderHash;
@@ -301,8 +298,7 @@ abstract contract MixinExchangeCore is
             fillResults.makerAssetFilledAmount,
             fillResults.takerAssetFilledAmount,
             fillResults.makerFeePaid,
-            fillResults.takerFeePaid,
-            fillResults.protocolFeePaid
+            fillResults.takerFeePaid
         );
     }
 
@@ -471,19 +467,6 @@ abstract contract MixinExchangeCore is
             order.feeRecipientAddress,
             fillResults.makerFeePaid
         );
-
-        // Pay protocol fee
-        bool didPayProtocolFee = _paySingleProtocolFee(
-            orderHash,
-            fillResults.protocolFeePaid,
-            order.makerAddress,
-            takerAddress
-        );
-
-        // Protocol fees are not paid if the protocolFeeCollector contract is not set
-        if (!didPayProtocolFee) {
-            fillResults.protocolFeePaid = 0;
-        }
     }
 
     /// @dev Gets the order's hash and amount of takerAsset that has already been filled.

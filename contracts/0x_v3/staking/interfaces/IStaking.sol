@@ -95,19 +95,6 @@ abstract contract IStaking {
         virtual
         external;
 
-    /// @dev Pays a protocol fee in ETH.
-    /// @param makerAddress The address of the order's maker.
-    /// @param payerAddress The address that is responsible for paying the protocol fee.
-    /// @param protocolFee The amount of protocol fees that should be paid.
-    function payProtocolFee(
-        address makerAddress,
-        address payerAddress,
-        uint256 protocolFee
-    )
-        virtual
-        external
-        payable;
-
     /// @dev Removes an existing exchange address
     /// @param addr Address of exchange contract to remove
     function removeExchangeAddress(address addr)

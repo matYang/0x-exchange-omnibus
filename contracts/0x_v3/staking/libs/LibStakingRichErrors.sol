@@ -99,10 +99,6 @@ library LibStakingRichErrors {
     bytes4 internal constant INVALID_PARAM_VALUE_ERROR_SELECTOR =
         0xfc45bd11;
 
-    // bytes4(keccak256("InvalidProtocolFeePaymentError(uint256,uint256)"))
-    bytes4 internal constant INVALID_PROTOCOL_FEE_PAYMENT_ERROR_SELECTOR =
-        0x31d7a505;
-
     // bytes4(keccak256("PreviousEpochNotFinalizedError(uint256,uint256)"))
     bytes4 internal constant PREVIOUS_EPOCH_NOT_FINALIZED_ERROR_SELECTOR =
         0x614b800a;
@@ -243,21 +239,6 @@ library LibStakingRichErrors {
             POOL_EXISTENCE_ERROR_SELECTOR,
             poolId,
             alreadyExists
-        );
-    }
-
-    function InvalidProtocolFeePaymentError(
-        uint256 expectedProtocolFeePaid,
-        uint256 actualProtocolFeePaid
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSelector(
-            INVALID_PROTOCOL_FEE_PAYMENT_ERROR_SELECTOR,
-            expectedProtocolFeePaid,
-            actualProtocolFeePaid
         );
     }
 

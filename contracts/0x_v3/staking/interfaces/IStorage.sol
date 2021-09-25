@@ -50,11 +50,6 @@ interface IStorage {
         view
         returns (uint256);
 
-    function protocolFeesThisEpochByPool(bytes32 poolId)
-        external
-        view
-        returns (uint256);
-
     function validExchanges(address exchangeAddress)
         external
         view
