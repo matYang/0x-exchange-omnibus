@@ -226,8 +226,7 @@ abstract contract MixinExchangeCore is
         fillResults = LibFillResults.calculateFillResults(
             order,
             takerAssetFilledAmount,
-            protocolFeeMultiplier,
-            tx.gasprice
+            protocolFeeMultiplier
         );
 
         bytes32 orderHash = orderInfo.orderHash;

@@ -63,8 +63,7 @@ library LibOrderTransferSimulation {
         LibFillResults.FillResults memory fillResults = LibFillResults.calculateFillResults(
             order,
             takerAssetFillAmount,
-            IExchange(exchange).protocolFeeMultiplier(),
-            tx.gasprice
+            IExchange(exchange).protocolFeeMultiplier()
         );
 
         bytes[] memory assetData = new bytes[](2);
@@ -110,8 +109,7 @@ library LibOrderTransferSimulation {
         LibFillResults.FillResults memory fillResults = LibFillResults.calculateFillResults(
             order,
             takerAssetFillAmount,
-            IExchange(exchange).protocolFeeMultiplier(),
-            tx.gasprice
+            IExchange(exchange).protocolFeeMultiplier()
         );
 
         // Create input arrays

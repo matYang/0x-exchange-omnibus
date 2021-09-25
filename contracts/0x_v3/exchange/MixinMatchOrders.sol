@@ -383,7 +383,6 @@ abstract contract MixinMatchOrders is
             leftOrderInfo.orderTakerAssetFilledAmount,
             rightOrderInfo.orderTakerAssetFilledAmount,
             protocolFeeMultiplier,
-            tx.gasprice,
             shouldMaximallyFillOrders
         );
 

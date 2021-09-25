@@ -78,7 +78,7 @@ abstract contract MixinProtocolFees is
 
     /// @dev Pays a protocol fee for a single fill.
     /// @param orderHash Hash of the order being filled.
-    /// @param protocolFee Value of the fee being paid (equal to protocolFeeMultiplier * tx.gasPrice).
+    /// @param protocolFee Value of the fee being paid
     /// @param makerAddress Address of maker of order being filled.
     /// @param takerAddress Address filling order.
     function _paySingleProtocolFee(
@@ -109,7 +109,7 @@ abstract contract MixinProtocolFees is
     /// @dev Pays a protocol fee for two orders (used when settling functions in MixinMatchOrders)
     /// @param orderHash1 Hash of the first order being filled.
     /// @param orderHash2 Hash of the second order being filled.
-    /// @param protocolFee Value of the fee being paid (equal to protocolFeeMultiplier * tx.gasPrice).
+    /// @param protocolFee Value of the fee being paid
     /// @param makerAddress1 Address of maker of first order being filled.
     /// @param makerAddress2 Address of maker of second order being filled.
     /// @param takerAddress Address filling orders.
@@ -158,7 +158,7 @@ abstract contract MixinProtocolFees is
     /// @param orderHash Hash of the order being filled.
     /// @param feeCollector Address of protocolFeeCollector contract.
     /// @param exchangeBalance Assumed ETH balance of Exchange contract (in wei).
-    /// @param protocolFee Value of the fee being paid (equal to protocolFeeMultiplier * tx.gasPrice).
+    /// @param protocolFee Value of the fee being paid
     /// @param makerAddress Address of maker of order being filled.
     /// @param takerAddress Address filling order.
     function _payProtocolFeeToFeeCollector(

@@ -73,8 +73,7 @@ contract OrderTransferSimulationUtils {
         LibFillResults.FillResults memory fillResults = LibFillResults.calculateFillResults(
             order,
             takerAssetFillAmount,
-            _EXCHANGE.protocolFeeMultiplier(),
-            tx.gasprice
+            _EXCHANGE.protocolFeeMultiplier()
         );
 
         bytes[] memory assetData = new bytes[](2);
@@ -118,8 +117,7 @@ contract OrderTransferSimulationUtils {
         LibFillResults.FillResults memory fillResults = LibFillResults.calculateFillResults(
             order,
             takerAssetFillAmount,
-            _EXCHANGE.protocolFeeMultiplier(),
-            tx.gasprice
+            _EXCHANGE.protocolFeeMultiplier()
         );
 
         // Create input arrays
