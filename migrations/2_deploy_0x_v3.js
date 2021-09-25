@@ -15,10 +15,10 @@ const DevUtils = artifacts.require('DevUtils');
 
 const NULL_ADDRESS = '0x0000000000000000000000000000000000000000'
 
-const CHAIN_ID = 888
+const CHAIN_ID = 4
 
 module.exports = async (deployer, network, accounts) => {
-    const txDefaults = { from: accounts[0], overwrite: false }
+    const txDefaults = { from: accounts[0], overwrite: true }
 
     await deployer.deploy(ERC20Proxy, txDefaults);
     const erc20Proxy = new ERC20Proxy.web3.eth.Contract(ERC20Proxy.abi, ERC20Proxy.address);
@@ -81,10 +81,15 @@ module.exports = async (deployer, network, accounts) => {
 
     console.log('Configuring MultiAssetProxy...');
     await multiAssetProxy.methods.addAuthorizedAddress(Exchange.address).send(txDefaults);
+    console.log('Configuring MultiAssetProxy...1');
     await multiAssetProxy.methods.registerAssetProxy(ERC20Proxy.address).send(txDefaults);
+    console.log('Configuring MultiAssetProxy...2');
     await multiAssetProxy.methods.registerAssetProxy(ERC721Proxy.address).send(txDefaults);
+    console.log('Configuring MultiAssetProxy...3');
     await multiAssetProxy.methods.registerAssetProxy(ERC1155Proxy.address).send(txDefaults);
+    console.log('Configuring MultiAssetProxy...4');
     await multiAssetProxy.methods.registerAssetProxy(ERC20BridgeProxy.address).send(txDefaults);
+    console.log('Configuring MultiAssetProxy...5');
     await multiAssetProxy.methods.registerAssetProxy(StaticCallProxy.address).send(txDefaults);
     console.log('MultiAssetProxy configured!');
 

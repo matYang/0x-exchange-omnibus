@@ -2,6 +2,9 @@ const HDWalletProvider = require('@truffle/hdwallet-provider');
 
 require('dotenv').config();
 
+const mnemonic = process.env["MNEMONIC"];
+const infuraKey = process.env["INFURA_KEY"];
+
 module.exports = {
     /**
      * Networks define how you connect to your ethereum client and let you set the
@@ -21,6 +24,10 @@ module.exports = {
         // options below to some value.
         //
         development: {
+            url: 'http://127.0.0.1:7545',
+            network_id: '*'
+        },
+        development_local: {
             provider: function() {
               return new HDWalletProvider(
                 process.env.MNEMONIC,
@@ -32,7 +39,22 @@ module.exports = {
             gasPrice: 0,
             gas: 80000000
         },
-       injective: {
+        rinkeby: {
+            network_id: 4,
+            chain_id: 4,
+            skipDryRun: true,
+            provider: function() {
+              return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/"+ infuraKey, 1);
+            }
+        },
+        kovan: {
+            network_id: 42,
+            chain_id: 42,
+            provider: function() {
+              return new HDWalletProvider(mnemonic, "https://kovan.infura.io/v3/"+ infuraKey, 1);
+            }
+        },
+        injective: {
             provider: function() {
               return new HDWalletProvider(
                 process.env.DEPLOYER_PRIVATE_KEY,
@@ -57,7 +79,7 @@ module.exports = {
             settings: {
                 optimizer: {
                     enabled: true,
-                    runs: 200
+                    runs: 20000
                 },
                 evmVersion: "petersburg"
             }
