@@ -4,6 +4,7 @@ require('dotenv').config();
 
 const mnemonic = process.env["MNEMONIC"];
 const infuraKey = process.env["INFURA_KEY"];
+const alchemyKey = process.env["ALCHEMY_KEY"];
 
 module.exports = {
     /**
@@ -45,6 +46,14 @@ module.exports = {
             skipDryRun: true,
             provider: function() {
               return new HDWalletProvider(mnemonic, "https://rinkeby.infura.io/v3/"+ infuraKey, 1);
+            }
+        },
+        rinkeby_alchemy: {
+            network_id: 4,
+            chain_id: 4,
+            skipDryRun: true,
+            provider: function() {
+              return new HDWalletProvider(mnemonic, "https://eth-rinkeby.alchemyapi.io/v2/"+ alchemyKey, 1);
             }
         },
         kovan: {
