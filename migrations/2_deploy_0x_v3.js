@@ -4,7 +4,6 @@ const ERC20BridgeProxy = artifacts.require('ERC20BridgeProxy');
 const ERC1155Proxy = artifacts.require('ERC1155Proxy');
 const StaticCallProxy = artifacts.require('StaticCallProxy');
 const MultiAssetProxy = artifacts.require('MultiAssetProxy');
-const CoordinatorRegistry = artifacts.require('CoordinatorRegistry');
 const Exchange = artifacts.require('Exchange');
 const DevUtils = artifacts.require('DevUtils');
 
@@ -20,9 +19,6 @@ module.exports = async (deployer, network, accounts) => {
 
     await deployer.deploy(ERC721Proxy, txDefaults);
     const erc721Proxy = new ERC721Proxy.web3.eth.Contract(ERC721Proxy.abi, ERC721Proxy.address);
-
-    await deployer.deploy(CoordinatorRegistry, txDefaults);
-    const coordinatorRegistry = new CoordinatorRegistry.web3.eth.Contract(CoordinatorRegistry.abi, CoordinatorRegistry.address);
 
     await deployer.deploy(ERC20BridgeProxy, txDefaults);
     const erc20BridgeProxy = new ERC20BridgeProxy.web3.eth.Contract(ERC20BridgeProxy.abi, ERC20BridgeProxy.address);
@@ -90,8 +86,6 @@ module.exports = async (deployer, network, accounts) => {
         exchange: Exchange.address,
         erc20BridgeProxy: ERC20BridgeProxy.address,
         forwarder: NULL_ADDRESS,
-        coordinatorRegistry: CoordinatorRegistry.address,
-        coordinator: NULL_ADDRESS,
         multiAssetProxy: MultiAssetProxy.address,
         staticCallProxy: StaticCallProxy.address
     };
