@@ -48,15 +48,15 @@ abstract contract MixinSignatureValidator is
     bytes4 private constant LEGACY_WALLET_MAGIC_VALUE = 0xb0671381;
 
     /// @dev Mapping of hash => signer => signed
-    /// @param 0 Order hash.
-    /// @param 1 Signer address.
-    /// @return 0 Whether the hash is presigned.
+    /// 0 Order hash.
+    /// 1 Signer address.
+    /// 0 Whether the hash is presigned.
     mapping (bytes32 => mapping (address => bool)) public preSigned;
 
     /// @dev Mapping of signer => validator => approved
-    /// @param 0 Signer address.
-    /// @param 1 Signature validator address.
-    /// @return 0 Whether the validator is allowed to validate on behalf of the signer.
+    /// 0 Signer address.
+    /// 1 Signature validator address.
+    /// 0 Whether the validator is allowed to validate on behalf of the signer.
     mapping (address => mapping (address => bool)) public allowedValidators;
 
     /// @dev Approves a hash on-chain.

@@ -43,20 +43,16 @@ abstract contract MixinExchangeCore is
     using LibBytes for bytes;
 
     /// @dev Mapping of orderHash => amount of takerAsset already bought by maker
-    /// @param 0 Order hash.
-    /// @return 0 The amount of taker asset filled.
     mapping (bytes32 => uint256) public filled;
 
     /// @dev Mapping of orderHash => cancelled
-    /// @param 0 Order hash.
-    /// @return 0 Whether the order was cancelled.
     mapping (bytes32 => bool) public cancelled;
 
     /// @dev Mapping of makerAddress => senderAddress => lowest salt an order can have in order to be fillable
     ///      Orders with specified senderAddress and with a salt less than their epoch are considered cancelled
-    /// @param 0 Address of the order's maker.
-    /// @param 1 Address of the order's sender.
-    /// @return 0 Minimum valid order epoch.
+    /// 0 Address of the order's maker.
+    /// 1 Address of the order's sender.
+    /// 0 Minimum valid order epoch.
     mapping (address => mapping (address => uint256)) public orderEpoch;
 
     /// @dev Cancels all orders created by makerAddress with a salt less than or equal to the targetOrderEpoch

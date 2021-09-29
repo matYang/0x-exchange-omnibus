@@ -38,8 +38,6 @@ abstract contract MixinTransactions is
 
     /// @dev Mapping of transaction hash => executed
     ///      This prevents transactions from being executed more than once.
-    /// @param 0 The transaction hash.
-    /// @return 0 Whether the transation was executed.
     mapping (bytes32 => bool) public transactionsExecuted;
 
     /// @dev Address of current transaction signer.
