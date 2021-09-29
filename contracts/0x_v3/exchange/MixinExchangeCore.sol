@@ -61,7 +61,6 @@ abstract contract MixinExchangeCore is
     function cancelOrdersUpTo(uint256 targetOrderEpoch)
         override
         external
-        payable
         refundFinalBalanceNoReentry
     {
         address makerAddress = _getCurrentContextAddress();
@@ -103,7 +102,6 @@ abstract contract MixinExchangeCore is
     )
         override
         public
-        payable
         refundFinalBalanceNoReentry
         returns (LibFillResults.FillResults memory fillResults)
     {
@@ -120,7 +118,6 @@ abstract contract MixinExchangeCore is
     function cancelOrder(LibOrder.Order memory order)
         override
         public
-        payable
         refundFinalBalanceNoReentry
     {
         _cancelOrder(order);

@@ -49,8 +49,7 @@ abstract contract ISignatureValidator {
     /// @param hash Any 32-byte hash.
     function preSign(bytes32 hash)
         virtual
-        external
-        payable;
+        external;
 
     /// @dev Approves/unnapproves a Validator contract to verify signatures on signer's behalf.
     /// @param validatorAddress Address of Validator contract.
@@ -60,8 +59,7 @@ abstract contract ISignatureValidator {
         bool approval
     )
         virtual
-        external
-        payable;
+        external;
 
     /// @dev Verifies that a hash has been signed by the given signer.
     /// @param hash Any 32-byte hash.

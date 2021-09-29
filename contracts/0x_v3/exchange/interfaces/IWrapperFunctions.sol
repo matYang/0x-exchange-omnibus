@@ -36,7 +36,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Executes multiple calls of fillOrder.
@@ -51,7 +50,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults);
 
     /// @dev Executes multiple calls of fillOrKillOrder.
@@ -66,7 +64,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults);
 
     /// @dev Executes multiple calls of fillOrder. If any fill reverts, the error is caught and ignored.
@@ -81,7 +78,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults);
 
     /// @dev Executes multiple calls of fillOrder until total amount of takerAsset is sold by taker.
@@ -98,7 +94,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Executes multiple calls of fillOrder until total amount of makerAsset is bought by taker.
@@ -115,7 +110,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Calls marketSellOrdersNoThrow then reverts if < takerAssetFillAmount has been sold.
@@ -131,7 +125,6 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Calls marketBuyOrdersNoThrow then reverts if < makerAssetFillAmount has been bought.
@@ -147,13 +140,11 @@ abstract contract IWrapperFunctions {
     )
         virtual
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults);
 
     /// @dev Executes multiple calls of cancelOrder.
     /// @param orders Array of order specifications.
     function batchCancelOrders(LibOrder.Order[] memory orders)
         virtual
-        public
-        payable;
+        public;
 }

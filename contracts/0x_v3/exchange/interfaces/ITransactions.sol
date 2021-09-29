@@ -37,7 +37,6 @@ abstract contract ITransactions {
     )
         virtual
         public
-        payable
         returns (bytes memory returnData);
 
     /// @dev Executes a batch of Exchange method calls in the context of signer(s).
@@ -50,7 +49,6 @@ abstract contract ITransactions {
     )
         virtual
         public
-        payable
         returns (bytes[] memory returnData);
 
     /// @dev The current function will be called in the context of this address (either 0x transaction signer or `msg.sender`).

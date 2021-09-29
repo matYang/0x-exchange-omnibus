@@ -54,7 +54,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        payable
         disableRefundUntilEnd
         returns (bytes memory returnData)
     {
@@ -71,7 +70,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        payable
         disableRefundUntilEnd
         returns (bytes[] memory returnData)
     {

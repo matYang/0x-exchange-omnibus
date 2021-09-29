@@ -65,7 +65,6 @@ abstract contract MixinSignatureValidator is
     function preSign(bytes32 hash)
         override
         external
-        payable
     {
         address signerAddress = _getCurrentContextAddress();
         preSigned[hash][signerAddress] = true;
@@ -81,7 +80,6 @@ abstract contract MixinSignatureValidator is
     )
         override
         external
-        payable
     {
         address signerAddress = _getCurrentContextAddress();
         allowedValidators[signerAddress][validatorAddress] = approval;

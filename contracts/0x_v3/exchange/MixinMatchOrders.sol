@@ -51,7 +51,6 @@ abstract contract MixinMatchOrders is
     )
         override
         public
-        payable
         returns (LibFillResults.BatchMatchedFillResults memory batchMatchedFillResults)
     {
         return _batchMatchOrders(
@@ -80,7 +79,6 @@ abstract contract MixinMatchOrders is
     )
         override
         public
-        payable
         returns (LibFillResults.BatchMatchedFillResults memory batchMatchedFillResults)
     {
         return _batchMatchOrders(
@@ -109,7 +107,6 @@ abstract contract MixinMatchOrders is
     )
         override
         public
-        payable
         returns (LibFillResults.MatchedFillResults memory matchedFillResults)
     {
         return _matchOrders(
@@ -138,7 +135,6 @@ abstract contract MixinMatchOrders is
     )
         override
         public
-        payable
         returns (LibFillResults.MatchedFillResults memory matchedFillResults)
     {
         return _matchOrders(

@@ -48,7 +48,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults)
     {
         fillResults = _fillOrKillOrder(
@@ -71,7 +70,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults)
     {
         uint256 ordersLength = orders.length;
@@ -98,7 +96,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults)
     {
         uint256 ordersLength = orders.length;
@@ -125,7 +122,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults[] memory fillResults)
     {
         uint256 ordersLength = orders.length;
@@ -154,7 +150,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults)
     {
         uint256 ordersLength = orders.length;
@@ -195,7 +190,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults)
     {
         uint256 ordersLength = orders.length;
@@ -243,7 +237,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults)
     {
         fillResults = marketSellOrdersNoThrow(orders, takerAssetFillAmount, signatures);
@@ -269,7 +262,6 @@ abstract contract MixinWrapperFunctions is
     )
         override
         public
-        payable
         returns (LibFillResults.FillResults memory fillResults)
     {
         fillResults = marketBuyOrdersNoThrow(orders, makerAssetFillAmount, signatures);
@@ -287,7 +279,6 @@ abstract contract MixinWrapperFunctions is
     function batchCancelOrders(LibOrder.Order[] memory orders)
         override
         public
-        payable
     {
         uint256 ordersLength = orders.length;
         for (uint256 i = 0; i != ordersLength; i++) {
