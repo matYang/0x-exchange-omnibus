@@ -21,7 +21,6 @@ pragma experimental ABIEncoderV2;
 import "../utils/LibBytes.sol";
 import "../utils/LibRichErrors.sol";
 import "../utils/LibSafeMath.sol";
-import "../utils/Refundable.sol";
 import "../exchange-libs/LibFillResults.sol";
 import "../exchange-libs/LibMath.sol";
 import "../exchange-libs/LibOrder.sol";
@@ -33,7 +32,6 @@ import "./MixinSignatureValidator.sol";
 
 abstract contract MixinExchangeCore is
     IExchangeCore,
-    Refundable,
     LibEIP712ExchangeDomain,
     MixinAssetProxyDispatcher,
     MixinSignatureValidator
@@ -61,7 +59,6 @@ abstract contract MixinExchangeCore is
     function cancelOrdersUpTo(uint256 targetOrderEpoch)
         override
         external
-        refundFinalBalanceNoReentry
     {
         address makerAddress = _getCurrentContextAddress();
         // If this function is called via `executeTransaction`, we only update the orderEpoch for the makerAddress/msg.sender combination.
@@ -102,7 +99,6 @@ abstract contract MixinExchangeCore is
     )
         override
         public
-        refundFinalBalanceNoReentry
         returns (LibFillResults.FillResults memory fillResults)
     {
         fillResults = _fillOrder(
@@ -118,7 +114,6 @@ abstract contract MixinExchangeCore is
     function cancelOrder(LibOrder.Order memory order)
         override
         public
-        refundFinalBalanceNoReentry
     {
         _cancelOrder(order);
     }

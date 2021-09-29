@@ -21,6 +21,8 @@ pragma experimental ABIEncoderV2;
 */
 
 
+
+
 library LibEIP712 {
 
     // Hash of the EIP712 Domain Separator Schema
@@ -135,6 +137,8 @@ library LibEIP712 {
 
 
 
+
+
 abstract contract LibEIP712ExchangeDomain {
 
     // EIP712 Exchange Domain Name value
@@ -186,6 +190,8 @@ abstract contract LibEIP712ExchangeDomain {
   limitations under the License.
 
 */
+
+
 
 
 library LibBytesRichErrors {
@@ -245,6 +251,8 @@ library LibBytesRichErrors {
 */
 
 
+
+
 library LibRichErrors {
 
     // bytes4(keccak256("Error(string)"))
@@ -302,6 +310,9 @@ library LibRichErrors {
   limitations under the License.
 
 */
+
+
+
 
 
 
@@ -815,6 +826,9 @@ library LibBytes {
 */
 
 
+
+
+
 library LibOrder {
 
     using LibOrder for Order;
@@ -970,6 +984,8 @@ library LibOrder {
 // File: contracts/0x_v3/utils/LibSafeMathRichErrors.sol
 
 
+
+
 library LibSafeMathRichErrors {
 
     // bytes4(keccak256("Uint256BinOpError(uint8,uint256,uint256)"))
@@ -1028,6 +1044,9 @@ library LibSafeMathRichErrors {
 }
 
 // File: contracts/0x_v3/utils/LibSafeMath.sol
+
+
+
 
 
 
@@ -1119,6 +1138,8 @@ library LibSafeMath {
 // File: contracts/0x_v3/exchange-libs/LibMathRichErrors.sol
 
 
+
+
 library LibMathRichErrors {
 
     // bytes4(keccak256("DivisionByZeroError()"))
@@ -1175,6 +1196,10 @@ library LibMathRichErrors {
   limitations under the License.
 
 */
+
+
+
+
 
 
 
@@ -1401,6 +1426,10 @@ library LibMath {
   limitations under the License.
 
 */
+
+
+
+
 
 
 
@@ -1805,6 +1834,9 @@ library LibFillResults {
   limitations under the License.
 
 */
+
+
+
 
 
 
@@ -2388,6 +2420,10 @@ library LibExchangeRichErrors {
 
 
 
+
+
+
+
 abstract contract IMatchOrders {
 
     /// @dev Match complementary orders that have a profitable spread.
@@ -2466,191 +2502,6 @@ abstract contract IMatchOrders {
         returns (LibFillResults.MatchedFillResults memory matchedFillResults);
 }
 
-// File: contracts/0x_v3/utils/LibReentrancyGuardRichErrors.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-library LibReentrancyGuardRichErrors {
-
-    // bytes4(keccak256("IllegalReentrancyError()"))
-    bytes internal constant ILLEGAL_REENTRANCY_ERROR_SELECTOR_BYTES =
-        hex"0c3b823f";
-
-    // solhint-disable func-name-mixedcase
-    function IllegalReentrancyError()
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return ILLEGAL_REENTRANCY_ERROR_SELECTOR_BYTES;
-    }
-}
-
-// File: contracts/0x_v3/utils/ReentrancyGuard.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-
-contract ReentrancyGuard {
-
-    // Locked state of mutex.
-    bool private _locked = false;
-
-    /// @dev Functions with this modifer cannot be reentered. The mutex will be locked
-    ///      before function execution and unlocked after.
-    modifier nonReentrant() {
-        _lockMutexOrThrowIfAlreadyLocked();
-        _;
-        _unlockMutex();
-    }
-
-    function _lockMutexOrThrowIfAlreadyLocked()
-        internal
-    {
-        // Ensure mutex is unlocked.
-        if (_locked) {
-            LibRichErrors.rrevert(
-                LibReentrancyGuardRichErrors.IllegalReentrancyError()
-            );
-        }
-        // Lock mutex.
-        _locked = true;
-    }
-
-    function _unlockMutex()
-        internal
-    {
-        // Unlock mutex.
-        _locked = false;
-    }
-}
-
-// File: contracts/0x_v3/utils/Refundable.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-contract Refundable is
-    ReentrancyGuard
-{
-
-    // This bool is used by the refund modifier to allow for lazily evaluated refunds.
-    bool internal _shouldNotRefund;
-
-    modifier refundFinalBalance {
-        _;
-        _refundNonZeroBalanceIfEnabled();
-    }
-
-    modifier refundFinalBalanceNoReentry {
-        _lockMutexOrThrowIfAlreadyLocked();
-        _;
-        _refundNonZeroBalanceIfEnabled();
-        _unlockMutex();
-    }
-
-    modifier disableRefundUntilEnd {
-        if (_areRefundsDisabled()) {
-            _;
-        } else {
-            _disableRefund();
-            _;
-            _enableAndRefundNonZeroBalance();
-        }
-    }
-
-    function _refundNonZeroBalanceIfEnabled()
-        internal
-    {
-        if (!_areRefundsDisabled()) {
-            _refundNonZeroBalance();
-        }
-    }
-
-    function _refundNonZeroBalance()
-        internal
-    {
-        uint256 balance = address(this).balance;
-        if (balance > 0) {
-            msg.sender.transfer(balance);
-        }
-    }
-
-    function _disableRefund()
-        internal
-    {
-        _shouldNotRefund = true;
-    }
-
-    function _enableAndRefundNonZeroBalance()
-        internal
-    {
-        _shouldNotRefund = false;
-        _refundNonZeroBalance();
-    }
-
-    function _areRefundsDisabled()
-        internal
-        view
-        returns (bool)
-    {
-        return _shouldNotRefund;
-    }
-}
-
 // File: contracts/0x_v3/exchange/interfaces/IExchangeCore.sol
 
 /*
@@ -2670,6 +2521,10 @@ contract Refundable is
   limitations under the License.
 
 */
+
+
+
+
 
 
 
@@ -3640,9 +3495,7 @@ abstract contract ITransactions {
 
 
 
-
 abstract contract MixinTransactions is
-    Refundable,
     LibEIP712ExchangeDomain,
     ISignatureValidator,
     ITransactions
@@ -3667,7 +3520,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        disableRefundUntilEnd
         returns (bytes memory returnData)
     {
         return _executeTransaction(transaction, signature);
@@ -3683,7 +3535,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        disableRefundUntilEnd
         returns (bytes[] memory returnData)
     {
         uint256 length = transactions.length;
@@ -4476,10 +4327,8 @@ abstract contract MixinSignatureValidator is
 
 
 
-
 abstract contract MixinExchangeCore is
     IExchangeCore,
-    Refundable,
     LibEIP712ExchangeDomain,
     MixinAssetProxyDispatcher,
     MixinSignatureValidator
@@ -4507,7 +4356,6 @@ abstract contract MixinExchangeCore is
     function cancelOrdersUpTo(uint256 targetOrderEpoch)
         override
         external
-        refundFinalBalanceNoReentry
     {
         address makerAddress = _getCurrentContextAddress();
         // If this function is called via `executeTransaction`, we only update the orderEpoch for the makerAddress/msg.sender combination.
@@ -4548,7 +4396,6 @@ abstract contract MixinExchangeCore is
     )
         override
         public
-        refundFinalBalanceNoReentry
         returns (LibFillResults.FillResults memory fillResults)
     {
         fillResults = _fillOrder(
@@ -4564,7 +4411,6 @@ abstract contract MixinExchangeCore is
     function cancelOrder(LibOrder.Order memory order)
         override
         public
-        refundFinalBalanceNoReentry
     {
         _cancelOrder(order);
     }
@@ -6028,6 +5874,7 @@ abstract contract MixinTransferSimulator is
   limitations under the License.
 
 */
+
 
 
 

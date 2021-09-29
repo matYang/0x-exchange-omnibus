@@ -23,13 +23,11 @@ import "../exchange-libs/LibZeroExTransaction.sol";
 import "../exchange-libs/LibEIP712ExchangeDomain.sol";
 import "../exchange-libs/LibExchangeRichErrors.sol";
 import "../utils/LibRichErrors.sol";
-import "../utils/Refundable.sol";
 import "./interfaces/ITransactions.sol";
 import "./interfaces/ISignatureValidator.sol";
 
 
 abstract contract MixinTransactions is
-    Refundable,
     LibEIP712ExchangeDomain,
     ISignatureValidator,
     ITransactions
@@ -54,7 +52,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        disableRefundUntilEnd
         returns (bytes memory returnData)
     {
         return _executeTransaction(transaction, signature);
@@ -70,7 +67,6 @@ abstract contract MixinTransactions is
     )
         override
         public
-        disableRefundUntilEnd
         returns (bytes[] memory returnData)
     {
         uint256 length = transactions.length;
