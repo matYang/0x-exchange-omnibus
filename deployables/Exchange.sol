@@ -1,4 +1,4 @@
-// SPDX-License-Identifier: MIT
+// SPDX-License-Identifier: Apache-2.0
 pragma solidity 0.6.12;
 pragma experimental ABIEncoderV2;
 
@@ -827,7 +827,10 @@ library LibBytes {
 
 
 
-
+/**
+ * changed makerAssetData and takerAssetData to makerToken and takerToken, bytes to address type
+ * changed removed makerFeeAssetData and takerFeeAssetData 
+ */
 
 library LibOrder {
 
@@ -846,10 +849,8 @@ library LibOrder {
     //     "uint256 takerFee,",
     //     "uint256 expirationTimeSeconds,",
     //     "uint256 salt,",
-    //     "bytes makerAssetData,",
-    //     "bytes takerAssetData,",
-    //     "bytes makerFeeAssetData,",
-    //     "bytes takerFeeAssetData",
+    //     "address makerToken,",
+    //     "address takerToken,"
     //     ")"
     // ))
     bytes32 constant internal _EIP712_ORDER_SCHEMA_HASH =
@@ -880,10 +881,8 @@ library LibOrder {
         uint256 takerFee;               // Fee paid to feeRecipient by taker when order is filled.
         uint256 expirationTimeSeconds;  // Timestamp in seconds at which order expires.
         uint256 salt;                   // Arbitrary number to facilitate uniqueness of the order's hash.
-        bytes makerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring makerAsset. The leading bytes4 references the id of the asset proxy.
-        bytes takerAssetData;           // Encoded data that can be decoded by a specified proxy contract when transferring takerAsset. The leading bytes4 references the id of the asset proxy.
-        bytes makerFeeAssetData;        // Encoded data that can be decoded by a specified proxy contract when transferring makerFeeAsset. The leading bytes4 references the id of the asset proxy.
-        bytes takerFeeAssetData;        // Encoded data that can be decoded by a specified proxy contract when transferring takerFeeAsset. The leading bytes4 references the id of the asset proxy.
+        address makerToken;             // Encoded data that can be decoded by a specified proxy contract when transferring makerAsset. The leading bytes4 references the id of the asset proxy.
+        address takerToken;             // Encoded data that can be decoded by a specified proxy contract when transferring takerAsset. The leading bytes4 references the id of the asset proxy.
     }
     // solhint-enable max-line-length
 
@@ -918,66 +917,23 @@ library LibOrder {
         returns (bytes32 result)
     {
         bytes32 schemaHash = _EIP712_ORDER_SCHEMA_HASH;
-        bytes memory makerAssetData = order.makerAssetData;
-        bytes memory takerAssetData = order.takerAssetData;
-        bytes memory makerFeeAssetData = order.makerFeeAssetData;
-        bytes memory takerFeeAssetData = order.takerFeeAssetData;
 
         // Assembly for more efficiently computing:
-        // keccak256(abi.encodePacked(
-        //     EIP712_ORDER_SCHEMA_HASH,
-        //     uint256(order.makerAddress),
-        //     uint256(order.takerAddress),
-        //     uint256(order.feeRecipientAddress),
-        //     uint256(order.senderAddress),
-        //     order.makerAssetAmount,
-        //     order.takerAssetAmount,
-        //     order.makerFee,
-        //     order.takerFee,
-        //     order.expirationTimeSeconds,
-        //     order.salt,
-        //     keccak256(order.makerAssetData),
-        //     keccak256(order.takerAssetData),
-        //     keccak256(order.makerFeeAssetData),
-        //     keccak256(order.takerFeeAssetData)
-        // ));
-
-        assembly {
-            // Assert order offset (this is an internal error that should never be triggered)
-            if lt(order, 32) {
-                invalid()
-            }
-
-            // Calculate memory addresses that will be swapped out before hashing
-            let pos1 := sub(order, 32)
-            let pos2 := add(order, 320)
-            let pos3 := add(order, 352)
-            let pos4 := add(order, 384)
-            let pos5 := add(order, 416)
-
-            // Backup
-            let temp1 := mload(pos1)
-            let temp2 := mload(pos2)
-            let temp3 := mload(pos3)
-            let temp4 := mload(pos4)
-            let temp5 := mload(pos5)
-
-            // Hash in place
-            mstore(pos1, schemaHash)
-            mstore(pos2, keccak256(add(makerAssetData, 32), mload(makerAssetData)))        // store hash of makerAssetData
-            mstore(pos3, keccak256(add(takerAssetData, 32), mload(takerAssetData)))        // store hash of takerAssetData
-            mstore(pos4, keccak256(add(makerFeeAssetData, 32), mload(makerFeeAssetData)))  // store hash of makerFeeAssetData
-            mstore(pos5, keccak256(add(takerFeeAssetData, 32), mload(takerFeeAssetData)))  // store hash of takerFeeAssetData
-            result := keccak256(pos1, 480)
-
-            // Restore
-            mstore(pos1, temp1)
-            mstore(pos2, temp2)
-            mstore(pos3, temp3)
-            mstore(pos4, temp4)
-            mstore(pos5, temp5)
-        }
-        return result;
+        return keccak256(abi.encodePacked(
+            schemaHash,
+            uint256(order.makerAddress),
+            uint256(order.takerAddress),
+            uint256(order.feeRecipientAddress),
+            uint256(order.senderAddress),
+            order.makerAssetAmount,
+            order.takerAssetAmount,
+            order.makerFee,
+            order.takerFee,
+            order.expirationTimeSeconds,
+            order.salt,
+            uint256(order.makerToken),
+            uint256(order.takerToken)
+        ));
     }
 }
 
@@ -1842,11 +1798,6 @@ library LibFillResults {
 
 library LibExchangeRichErrors {
 
-    enum AssetProxyDispatchErrorCodes {
-        INVALID_ASSET_DATA_LENGTH,
-        UNKNOWN_ASSET_PROXY
-    }
-
     enum BatchMatchOrdersErrorCodes {
         ZERO_LEFT_ORDERS,
         ZERO_RIGHT_ORDERS,
@@ -1919,18 +1870,6 @@ library LibExchangeRichErrors {
     // bytes4(keccak256("OrderEpochError(address,address,uint256)"))
     bytes4 internal constant ORDER_EPOCH_ERROR_SELECTOR =
         0x4ad31275;
-
-    // bytes4(keccak256("AssetProxyExistsError(bytes4,address)"))
-    bytes4 internal constant ASSET_PROXY_EXISTS_ERROR_SELECTOR =
-        0x11c7b720;
-
-    // bytes4(keccak256("AssetProxyDispatchError(uint8,bytes32,bytes)"))
-    bytes4 internal constant ASSET_PROXY_DISPATCH_ERROR_SELECTOR =
-        0x488219a6;
-
-    // bytes4(keccak256("AssetProxyTransferError(bytes32,bytes,bytes)"))
-    bytes4 internal constant ASSET_PROXY_TRANSFER_ERROR_SELECTOR =
-        0x4678472b;
 
     // bytes4(keccak256("NegativeSpreadError(bytes32,bytes32)"))
     bytes4 internal constant NEGATIVE_SPREAD_ERROR_SELECTOR =
@@ -2023,30 +1962,6 @@ library LibExchangeRichErrors {
         returns (bytes4)
     {
         return ORDER_EPOCH_ERROR_SELECTOR;
-    }
-
-    function AssetProxyExistsErrorSelector()
-        internal
-        pure
-        returns (bytes4)
-    {
-        return ASSET_PROXY_EXISTS_ERROR_SELECTOR;
-    }
-
-    function AssetProxyDispatchErrorSelector()
-        internal
-        pure
-        returns (bytes4)
-    {
-        return ASSET_PROXY_DISPATCH_ERROR_SELECTOR;
-    }
-
-    function AssetProxyTransferErrorSelector()
-        internal
-        pure
-        returns (bytes4)
-    {
-        return ASSET_PROXY_TRANSFER_ERROR_SELECTOR;
     }
 
     function NegativeSpreadErrorSelector()
@@ -2251,55 +2166,6 @@ library LibExchangeRichErrors {
             makerAddress,
             orderSenderAddress,
             currentEpoch
-        );
-    }
-
-    function AssetProxyExistsError(
-        bytes4 assetProxyId,
-        address assetProxyAddress
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSelector(
-            ASSET_PROXY_EXISTS_ERROR_SELECTOR,
-            assetProxyId,
-            assetProxyAddress
-        );
-    }
-
-    function AssetProxyDispatchError(
-        AssetProxyDispatchErrorCodes errorCode,
-        bytes32 orderHash,
-        bytes memory assetData
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSelector(
-            ASSET_PROXY_DISPATCH_ERROR_SELECTOR,
-            errorCode,
-            orderHash,
-            assetData
-        );
-    }
-
-    function AssetProxyTransferError(
-        bytes32 orderHash,
-        bytes memory assetData,
-        bytes memory errorData
-    )
-        internal
-        pure
-        returns (bytes memory)
-    {
-        return abi.encodeWithSelector(
-            ASSET_PROXY_TRANSFER_ERROR_SELECTOR,
-            orderHash,
-            assetData,
-            errorData
         );
     }
 
@@ -2534,25 +2400,23 @@ abstract contract IExchangeCore {
     event Fill(
         address indexed makerAddress,         // Address that created the order.
         address indexed feeRecipientAddress,  // Address that received fees.
-        bytes makerAssetData,                 // Encoded data specific to makerAsset.
-        bytes takerAssetData,                 // Encoded data specific to takerAsset.
-        bytes makerFeeAssetData,              // Encoded data specific to makerFeeAsset.
-        bytes takerFeeAssetData,              // Encoded data specific to takerFeeAsset.
+        address makerToken,                   // Address of makerAsset.
+        address takerToken,                   // Address of takerAsset.
         bytes32 indexed orderHash,            // EIP712 hash of order (see LibOrder.getTypedDataHash).
         address takerAddress,                 // Address that filled the order.
         address senderAddress,                // Address that called the Exchange contract (msg.sender).
         uint256 makerAssetFilledAmount,       // Amount of makerAsset sold by maker and bought by taker.
         uint256 takerAssetFilledAmount,       // Amount of takerAsset sold by taker and bought by maker.
-        uint256 makerFeePaid,                 // Amount of makerFeeAssetData paid to feeRecipient by maker.
-        uint256 takerFeePaid                  // Amount of takerFeeAssetData paid to feeRecipient by taker.
+        uint256 makerFeePaid,                 // Amount of makerFee paid to feeRecipient by maker.
+        uint256 takerFeePaid                  // Amount of takerFee paid to feeRecipient by taker.
     );
 
     // Cancel event is emitted whenever an individual order is cancelled.
     event Cancel(
         address indexed makerAddress,         // Address that created the order.
         address indexed feeRecipientAddress,  // Address that would have recieved fees if order was filled.
-        bytes makerAssetData,                 // Encoded data specific to makerAsset.
-        bytes takerAssetData,                 // Encoded data specific to takerAsset.
+        address makerToken,                   // Address of makerAsset.
+        address takerToken,                   // Address of takerAsset.
         address senderAddress,                // Address that called the Exchange contract (msg.sender).
         bytes32 indexed orderHash             // EIP712 hash of order (see LibOrder.getTypedDataHash).
     );
@@ -2751,101 +2615,6 @@ contract Ownable is
     }
 }
 
-// File: contracts/0x_v3/exchange/interfaces/IAssetProxy.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-
-abstract contract IAssetProxy {
-
-    /// @dev Transfers assets. Either succeeds or throws.
-    /// @param assetData Byte array encoded for the respective asset proxy.
-    /// @param from Address to transfer asset from.
-    /// @param to Address to transfer asset to.
-    /// @param amount Amount of asset to transfer.
-    function transferFrom(
-        bytes calldata assetData,
-        address from,
-        address to,
-        uint256 amount
-    )
-        virtual
-        external;
-
-    /// @dev Gets the proxy id associated with the proxy address.
-    /// @return proxyId Proxy id.
-    function getProxyId()
-        virtual
-        external
-        pure
-        returns (bytes4 proxyId);
-}
-
-// File: contracts/0x_v3/exchange/interfaces/IAssetProxyDispatcher.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-
-abstract contract IAssetProxyDispatcher {
-
-    // Logs registration of new asset proxy
-    event AssetProxyRegistered(
-        bytes4 id,              // Id of new registered AssetProxy.
-        address assetProxy      // Address of new registered AssetProxy.
-    );
-
-    /// @dev Registers an asset proxy to its asset proxy id.
-    ///      Once an asset proxy is registered, it cannot be unregistered.
-    /// @param assetProxy Address of new asset proxy to register.
-    function registerAssetProxy(address assetProxy)
-        virtual
-        external;
-
-    /// @dev Gets an asset proxy.
-    /// @param assetProxyId Id of the asset proxy.
-    /// @return proxy The asset proxy registered to assetProxyId. Returns 0x0 if no proxy is registered.
-    function getAssetProxy(bytes4 assetProxyId)
-        virtual
-        external
-        view
-        returns (address proxy);
-}
 
 // File: contracts/0x_v3/exchange/MixinAssetProxyDispatcher.sol
 
@@ -2868,70 +2637,89 @@ abstract contract IAssetProxyDispatcher {
 */
 
 
+/**
+ * @dev Interface of the ERC20 standard as defined in the EIP.
+ */
+interface IERC20 {
+    /**
+     * @dev Returns the amount of tokens in existence.
+     */
+    function totalSupply() external view returns (uint256);
+
+    /**
+     * @dev Returns the amount of tokens owned by `account`.
+     */
+    function balanceOf(address account) external view returns (uint256);
+
+    /**
+     * @dev Moves `amount` tokens from the caller's account to `recipient`.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transfer(address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Returns the remaining number of tokens that `spender` will be
+     * allowed to spend on behalf of `owner` through {transferFrom}. This is
+     * zero by default.
+     *
+     * This value changes when {approve} or {transferFrom} are called.
+     */
+    function allowance(address owner, address spender) external view returns (uint256);
+
+    /**
+     * @dev Sets `amount` as the allowance of `spender` over the caller's tokens.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * IMPORTANT: Beware that changing an allowance with this method brings the risk
+     * that someone may use both the old and the new allowance by unfortunate
+     * transaction ordering. One possible solution to mitigate this race
+     * condition is to first reduce the spender's allowance to 0 and set the
+     * desired value afterwards:
+     * https://github.com/ethereum/EIPs/issues/20#issuecomment-263524729
+     *
+     * Emits an {Approval} event.
+     */
+    function approve(address spender, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Moves `amount` tokens from `sender` to `recipient` using the
+     * allowance mechanism. `amount` is then deducted from the caller's
+     * allowance.
+     *
+     * Returns a boolean value indicating whether the operation succeeded.
+     *
+     * Emits a {Transfer} event.
+     */
+    function transferFrom(address sender, address recipient, uint256 amount) external returns (bool);
+
+    /**
+     * @dev Emitted when `value` tokens are moved from one account (`from`) to
+     * another (`to`).
+     *
+     * Note that `value` may be zero.
+     */
+    event Transfer(address indexed from, address indexed to, uint256 value);
+
+    /**
+     * @dev Emitted when the allowance of a `spender` for an `owner` is set by
+     * a call to {approve}. `value` is the new allowance.
+     */
+    event Approval(address indexed owner, address indexed spender, uint256 value);
+}
 
 
-
-
-
-
-
-
-abstract contract MixinAssetProxyDispatcher is
-    Ownable,
-    IAssetProxyDispatcher
-{
-    using LibBytes for bytes;
-
-    // Mapping from Asset Proxy Id's to their respective Asset Proxy
-    mapping (bytes4 => address) internal _assetProxies;
-
-    /// @dev Registers an asset proxy to its asset proxy id.
-    ///      Once an asset proxy is registered, it cannot be unregistered.
-    /// @param assetProxy Address of new asset proxy to register.
-    function registerAssetProxy(address assetProxy)
-        override
-        external
-        onlyOwner
-    {
-        // Ensure that no asset proxy exists with current id.
-        bytes4 assetProxyId = IAssetProxy(assetProxy).getProxyId();
-        address currentAssetProxy = _assetProxies[assetProxyId];
-        if (currentAssetProxy != address(0)) {
-            LibRichErrors.rrevert(LibExchangeRichErrors.AssetProxyExistsError(
-                assetProxyId,
-                currentAssetProxy
-            ));
-        }
-
-        // Add asset proxy and log registration.
-        _assetProxies[assetProxyId] = assetProxy;
-        emit AssetProxyRegistered(
-            assetProxyId,
-            assetProxy
-        );
-    }
-
-    /// @dev Gets an asset proxy.
-    /// @param assetProxyId Id of the asset proxy.
-    /// @return assetProxy The asset proxy address registered to assetProxyId. Returns 0x0 if no proxy is registered.
-    function getAssetProxy(bytes4 assetProxyId)
-        override
-        external
-        view
-        returns (address assetProxy)
-    {
-        return _assetProxies[assetProxyId];
-    }
-
-    /// @dev Forwards arguments to assetProxy and calls `transferFrom`. Either succeeds or throws.
-    /// @param orderHash Hash of the order associated with this transfer.
-    /// @param assetData Byte array encoded for the asset.
+abstract contract MixinAssetProxyDispatcher {
+    /// @dev Calls `transferFrom`. Either succeeds or throws.
+    /// @param assetAddress Byte array encoded for the asset.
     /// @param from Address to transfer token from.
     /// @param to Address to transfer token to.
     /// @param amount Amount of token to transfer.
     function _dispatchTransferFrom(
-        bytes32 orderHash,
-        bytes memory assetData,
+        address assetAddress,
         address from,
         address to,
         uint256 amount
@@ -2940,49 +2728,7 @@ abstract contract MixinAssetProxyDispatcher is
     {
         // Do nothing if no amount should be transferred.
         if (amount > 0) {
-
-            // Ensure assetData is padded to 32 bytes (excluding the id) and is at least 4 bytes long
-            if (assetData.length % 32 != 4) {
-                LibRichErrors.rrevert(LibExchangeRichErrors.AssetProxyDispatchError(
-                    LibExchangeRichErrors.AssetProxyDispatchErrorCodes.INVALID_ASSET_DATA_LENGTH,
-                    orderHash,
-                    assetData
-                ));
-            }
-
-            // Lookup assetProxy.
-            bytes4 assetProxyId = assetData.readBytes4(0);
-            address assetProxy = _assetProxies[assetProxyId];
-
-            // Ensure that assetProxy exists
-            if (assetProxy == address(0)) {
-                LibRichErrors.rrevert(LibExchangeRichErrors.AssetProxyDispatchError(
-                    LibExchangeRichErrors.AssetProxyDispatchErrorCodes.UNKNOWN_ASSET_PROXY,
-                    orderHash,
-                    assetData
-                ));
-            }
-
-            // Construct the calldata for the transferFrom call.
-            bytes memory proxyCalldata = abi.encodeWithSelector(
-                IAssetProxy(address(0)).transferFrom.selector,
-                assetData,
-                from,
-                to,
-                amount
-            );
-
-            // Call the asset proxy's transferFrom function with the constructed calldata.
-            (bool didSucceed, bytes memory returnData) = assetProxy.call(proxyCalldata);
-
-            // If the transaction did not succeed, revert with the returned data.
-            if (!didSucceed) {
-                LibRichErrors.rrevert(LibExchangeRichErrors.AssetProxyTransferError(
-                    orderHash,
-                    assetData,
-                    returnData
-                ));
-            }
+            IERC20(assetAddress).transferFrom(from, to, amount);
         }
     }
 }
@@ -4524,7 +4270,6 @@ abstract contract MixinExchangeCore is
 
         // Settle order
         _settleOrder(
-            orderHash,
             order,
             takerAddress,
             fillResults
@@ -4573,10 +4318,8 @@ abstract contract MixinExchangeCore is
         emit Fill(
             order.makerAddress,
             order.feeRecipientAddress,
-            order.makerAssetData,
-            order.takerAssetData,
-            order.makerFeeAssetData,
-            order.takerFeeAssetData,
+            order.makerToken,
+            order.takerToken,
             orderHash,
             takerAddress,
             msg.sender,
@@ -4605,8 +4348,8 @@ abstract contract MixinExchangeCore is
         emit Cancel(
             order.makerAddress,
             order.feeRecipientAddress,
-            order.makerAssetData,
-            order.takerAssetData,
+            order.makerToken,
+            order.takerToken,
             msg.sender,
             orderHash
         );
@@ -4705,12 +4448,10 @@ abstract contract MixinExchangeCore is
     }
 
     /// @dev Settles an order by transferring assets between counterparties.
-    /// @param orderHash The order hash.
     /// @param order Order struct containing order specifications.
     /// @param takerAddress Address selling takerAsset and buying makerAsset.
     /// @param fillResults Amounts to be filled and fees paid by maker and taker.
     function _settleOrder(
-        bytes32 orderHash,
         LibOrder.Order memory order,
         address takerAddress,
         LibFillResults.FillResults memory fillResults
@@ -4719,8 +4460,7 @@ abstract contract MixinExchangeCore is
     {
         // Transfer taker -> maker
         _dispatchTransferFrom(
-            orderHash,
-            order.takerAssetData,
+            order.takerToken,
             takerAddress,
             order.makerAddress,
             fillResults.takerAssetFilledAmount
@@ -4728,8 +4468,7 @@ abstract contract MixinExchangeCore is
 
         // Transfer maker -> taker
         _dispatchTransferFrom(
-            orderHash,
-            order.makerAssetData,
+            order.makerToken,
             order.makerAddress,
             takerAddress,
             fillResults.makerAssetFilledAmount
@@ -4737,8 +4476,7 @@ abstract contract MixinExchangeCore is
 
         // Transfer taker fee -> feeRecipient
         _dispatchTransferFrom(
-            orderHash,
-            order.takerFeeAssetData,
+            order.takerToken,
             takerAddress,
             order.feeRecipientAddress,
             fillResults.takerFeePaid
@@ -4746,8 +4484,7 @@ abstract contract MixinExchangeCore is
 
         // Transfer maker fee -> feeRecipient
         _dispatchTransferFrom(
-            orderHash,
-            order.makerFeeAssetData,
+            order.makerToken,
             order.makerAddress,
             order.feeRecipientAddress,
             fillResults.makerFeePaid
@@ -5111,11 +4848,11 @@ abstract contract MixinMatchOrders is
         internal
         returns (LibFillResults.MatchedFillResults memory matchedFillResults)
     {
-        // We assume that rightOrder.takerAssetData == leftOrder.makerAssetData and rightOrder.makerAssetData == leftOrder.takerAssetData
+        // We assume that rightOrder.takerToken == leftOrder.makerToken and rightOrder.makerToken == leftOrder.takerToken
         // by pointing these values to the same location in memory. This is cheaper than checking equality.
         // If this assumption isn't true, the match will fail at signature validation.
-        rightOrder.makerAssetData = leftOrder.takerAssetData;
-        rightOrder.takerAssetData = leftOrder.makerAssetData;
+        rightOrder.makerToken = leftOrder.takerToken;
+        rightOrder.takerToken = leftOrder.makerToken;
 
         // Get left & right order info
         LibOrder.OrderInfo memory leftOrderInfo = getOrderInfo(leftOrder);
@@ -5171,8 +4908,6 @@ abstract contract MixinMatchOrders is
 
         // Settle matched orders. Succeeds or throws.
         _settleMatchedOrders(
-            leftOrderInfo.orderHash,
-            rightOrderInfo.orderHash,
             leftOrder,
             rightOrder,
             takerAddress,
@@ -5183,15 +4918,11 @@ abstract contract MixinMatchOrders is
     }
 
     /// @dev Settles matched order by transferring appropriate funds between order makers, taker, and fee recipient.
-    /// @param leftOrderHash First matched order hash.
-    /// @param rightOrderHash Second matched order hash.
     /// @param leftOrder First matched order.
     /// @param rightOrder Second matched order.
     /// @param takerAddress Address that matched the orders. The taker receives the spread between orders as profit.
     /// @param matchedFillResults Struct holding amounts to transfer between makers, taker, and fee recipients.
     function _settleMatchedOrders(
-        bytes32 leftOrderHash,
-        bytes32 rightOrderHash,
         LibOrder.Order memory leftOrder,
         LibOrder.Order memory rightOrder,
         address takerAddress,
@@ -5206,8 +4937,7 @@ abstract contract MixinMatchOrders is
 
         // Right maker asset -> left maker
         _dispatchTransferFrom(
-            rightOrderHash,
-            rightOrder.makerAssetData,
+            rightOrder.makerToken,
             rightMakerAddress,
             leftMakerAddress,
             matchedFillResults.left.takerAssetFilledAmount
@@ -5215,8 +4945,7 @@ abstract contract MixinMatchOrders is
 
         // Left maker asset -> right maker
         _dispatchTransferFrom(
-            leftOrderHash,
-            leftOrder.makerAssetData,
+            leftOrder.makerToken,
             leftMakerAddress,
             rightMakerAddress,
             matchedFillResults.right.takerAssetFilledAmount
@@ -5224,8 +4953,7 @@ abstract contract MixinMatchOrders is
 
         // Right maker fee -> right fee recipient
         _dispatchTransferFrom(
-            rightOrderHash,
-            rightOrder.makerFeeAssetData,
+            rightOrder.makerToken,
             rightMakerAddress,
             rightFeeRecipientAddress,
             matchedFillResults.right.makerFeePaid
@@ -5233,8 +4961,7 @@ abstract contract MixinMatchOrders is
 
         // Left maker fee -> left fee recipient
         _dispatchTransferFrom(
-            leftOrderHash,
-            leftOrder.makerFeeAssetData,
+            leftOrder.makerToken,
             leftMakerAddress,
             leftFeeRecipientAddress,
             matchedFillResults.left.makerFeePaid
@@ -5242,15 +4969,13 @@ abstract contract MixinMatchOrders is
 
         // Settle taker profits.
         _dispatchTransferFrom(
-            leftOrderHash,
-            leftOrder.makerAssetData,
+            leftOrder.makerToken,
             leftMakerAddress,
             takerAddress,
             matchedFillResults.profitInLeftMakerAsset
         );
         _dispatchTransferFrom(
-            rightOrderHash,
-            rightOrder.makerAssetData,
+            rightOrder.makerToken,
             rightMakerAddress,
             takerAddress,
             matchedFillResults.profitInRightMakerAsset
@@ -5260,13 +4985,12 @@ abstract contract MixinMatchOrders is
         // Settle taker fees.
         if (
             leftFeeRecipientAddress == rightFeeRecipientAddress &&
-            leftOrder.takerFeeAssetData.equals(rightOrder.takerFeeAssetData)
+            leftOrder.takerToken == rightOrder.takerToken
         ) {
             // Fee recipients and taker fee assets are identical, so we can
             // transfer them in one go.
             _dispatchTransferFrom(
-                leftOrderHash,
-                leftOrder.takerFeeAssetData,
+                leftOrder.takerToken,
                 takerAddress,
                 leftFeeRecipientAddress,
                 matchedFillResults.left.takerFeePaid.safeAdd(matchedFillResults.right.takerFeePaid)
@@ -5274,8 +4998,7 @@ abstract contract MixinMatchOrders is
         } else {
             // Right taker fee -> right fee recipient
             _dispatchTransferFrom(
-                rightOrderHash,
-                rightOrder.takerFeeAssetData,
+                rightOrder.takerToken,
                 takerAddress,
                 rightFeeRecipientAddress,
                 matchedFillResults.right.takerFeePaid
@@ -5283,8 +5006,7 @@ abstract contract MixinMatchOrders is
 
             // Left taker fee -> left fee recipient
             _dispatchTransferFrom(
-                leftOrderHash,
-                leftOrder.takerFeeAssetData,
+                leftOrder.takerToken,
                 takerAddress,
                 leftFeeRecipientAddress,
                 matchedFillResults.left.takerFeePaid
@@ -5793,95 +5515,6 @@ abstract contract MixinWrapperFunctions is
     }
 }
 
-// File: contracts/0x_v3/exchange/MixinTransferSimulator.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-
-
-
-abstract contract MixinTransferSimulator is
-    MixinAssetProxyDispatcher
-{
-    /// @dev This function may be used to simulate any amount of transfers
-    /// As they would occur through the Exchange contract. Note that this function
-    /// will always revert, even if all transfers are successful. However, it may
-    /// be used with eth_call or with a try/catch pattern in order to simulate
-    /// the results of the transfers. This function does not return a value.
-    /// However, it will always revert with `Error("TRANSFERS_SUCCESSFUL")`
-    /// if all of the transfers were successful.
-    /// @param assetData Array of asset details, each encoded per the AssetProxy contract specification.
-    /// @param fromAddresses Array containing the `from` addresses that correspond with each transfer.
-    /// @param toAddresses Array containing the `to` addresses that correspond with each transfer.
-    /// @param amounts Array containing the amounts that correspond to each transfer.
-    function simulateDispatchTransferFromCalls(
-        bytes[] memory assetData,
-        address[] memory fromAddresses,
-        address[] memory toAddresses,
-        uint256[] memory amounts
-    )
-        public
-    {
-        uint256 length = assetData.length;
-        for (uint256 i = 0; i != length; i++) {
-            _dispatchTransferFrom(
-                // The index is passed in as `orderHash` so that a failed transfer can be quickly identified when catching the error
-                bytes32(i),
-                assetData[i],
-                fromAddresses[i],
-                toAddresses[i],
-                amounts[i]
-            );
-        }
-        revert("TRANSFERS_SUCCESSFUL");
-    }
-}
-
-// File: contracts/0x_v3/exchange/Exchange.sol
-
-/*
-
-  Copyright 2019 ZeroEx Intl.
-
-  Licensed under the Apache License, Version 2.0 (the "License");
-  you may not use this file except in compliance with the License.
-  You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-  Unless required by applicable law or agreed to in writing, software
-  distributed under the License is distributed on an "AS IS" BASIS,
-  WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-  See the License for the specific language governing permissions and
-  limitations under the License.
-
-*/
-
-
-
-
-
-
-
-
 
 // solhint-disable no-empty-blocks
 // MixinAssetProxyDispatcher, MixinExchangeCore, MixinSignatureValidator,
@@ -5891,8 +5524,7 @@ abstract contract MixinTransferSimulator is
 contract Exchange is
     LibEIP712ExchangeDomain,
     MixinMatchOrders,
-    MixinWrapperFunctions,
-    MixinTransferSimulator
+    MixinWrapperFunctions
 {
     /// @dev Mixins are instantiated in the order they are inherited
     /// @param chainId Chain ID of the network this contract is deployed on.
